@@ -1,0 +1,669 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo.png' %}">
+    <title>My Profile - Grocery Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your Grocery Guide account and delivery addresses.">
+
+    <!-- Google fonts used by the original Grocery Guide template -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon fonts and original Grocery Guide Bootstrap/theme styles -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <!-- Profile-specific styling, retaining Grocery Guide green/yellow palette -->
+    <style>
+        :root { --gg-primary:#81c408; --gg-secondary:#ffb524; --gg-dark:#45595b; }
+        body { font-family:"Open Sans",sans-serif; color:var(--gg-dark); }
+        h1,h2,h3,h4,h5,h6 { font-family:"Raleway",sans-serif; }
+        .profile-hero { padding:155px 0 45px; background:linear-gradient(120deg,#f5faeb,#fff9ec); }
+        .profile-shell { padding:45px 0 65px; }
+        .profile-card { background:#fff; border:1px solid #e9eee5; border-radius:14px; padding:26px; margin-bottom:24px; box-shadow:0 5px 22px rgba(0,0,0,.035); }
+        .profile-avatar { width:88px; height:88px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#f0f8df; color:var(--gg-primary); font-size:34px; border:3px solid #e2f0c8; }
+        .profile-nav .list-group-item { border:0; border-radius:9px!important; padding:13px 15px; color:var(--gg-dark); margin-bottom:5px; }
+        .profile-nav .list-group-item.active { background:var(--gg-primary); color:#fff; }
+        .profile-nav .list-group-item i { width:24px; }
+        .section-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:22px; }
+        .section-heading h4 { font-weight:700; margin:0; }
+        .form-label { font-weight:600; font-size:.9rem; }
+        .form-control,.form-select { min-height:47px; border-radius:8px; border-color:#dfe5e8; }
+        .form-control:focus,.form-select:focus { border-color:var(--gg-primary); box-shadow:0 0 0 .2rem rgba(129,196,8,.12); }
+        .address-card { height:100%; border:1px solid #e7ece5; border-radius:12px; padding:20px; transition:.2s; }
+        .address-card:hover { border-color:var(--gg-primary); transform:translateY(-2px); }
+        .address-icon { width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; color:var(--gg-primary); background:#f1f8e5; }
+        .profile-stat { background:#f7f9f3; border-radius:10px; padding:15px; }
+        .profile-stat i { color:var(--gg-primary); font-size:20px; }
+        .btn-primary { background:var(--gg-primary); border-color:var(--gg-primary); }
+        .btn-primary:hover { background:#70ad06; border-color:#70ad06; }
+        .btn-outline-primary { color:var(--gg-primary); border-color:var(--gg-primary); }
+        .btn-outline-primary:hover { background:var(--gg-primary); border-color:var(--gg-primary); }
+        @media(max-width:767px) { .profile-hero { padding-top:135px; } .profile-card { padding:19px; } }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         HEADER SECTION START
+         Topbar and navbar follow the original Grocery Guide layout.
+    ========================================================== -->
+    <div class="container-fluid fixed-top">
+        <!-- Top contact / policy bar -->
+        <div class="container topbar bg-primary d-none d-lg-block">
+            <div class="d-flex justify-content-between">
+                <div class="top-info ps-2">
+                    <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i><a href="#" class="text-white">Saltlake, Sector V</a></small>
+                    <small class="me-3"><i class="fas fa-envelope me-2 text-secondary"></i><a href="mailto:groceryguideai@gmail.com" class="text-white">groceryguideai@gmail.com</a></small>
+                </div>
+                <div class="top-link pe-2">
+                    <a href="#" class="text-white"><small class="text-white mx-2">Privacy Policy</small>/</a>
+                    <a href="#" class="text-white"><small class="text-white mx-2">Terms of Use</small>/</a>
+                    <a href="#" class="text-white"><small class="text-white ms-2">Sales and Refunds</small></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main site navigation -->
+        <div class="container px-0">
+            <nav class="navbar navbar-light bg-white navbar-expand-xl">
+                <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center"><img src="{% static 'img/logo.png' %}" alt="Grocery Guide" style="height: 80px; width: auto;" class="me-2"><h1 class="text-primary display-6 mb-0">Grocery Guide</h1></a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto">
+                        <a href="{% url 'home' %}" class="nav-item nav-link">Home</a>
+                        <a href="{% url 'shop_page' %}" class="nav-item nav-link">Shop</a>
+                        <a href="{% url 'cart_page' %}" class="nav-item nav-link">Shop Cart</a>
+                        <a href="{% url 'checkout' %}" class="nav-item nav-link">Checkout</a>
+                        <a href="{% url 'contact' %}" class="nav-item nav-link">Contact</a>
+                        <a href="{% url 'guide' %}" class="nav-item nav-link">Guide</a>
+                    </div>
+
+                    <!-- Search, cart badge and logged-in customer dropdown -->
+                    <div class="d-flex m-3 me-0 align-items-center">
+                        <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
+                            <i class="fas fa-search text-primary"></i>
+                        </button>
+                        <a href="{% url 'cart_page' %}" class="position-relative me-3 my-auto" aria-label="Shopping cart">
+                            <i class="fa fa-shopping-bag fa-2x text-primary"></i>
+                            <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top:-5px;left:15px;height:20px;min-width:20px;">{{ cart_count|default:0 }}</span>
+                        </a>
+                        {% if user.is_authenticated %}
+                            <div class="dropdown my-auto ms-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user fa-lg me-2 text-primary"></i><span class="fw-bold small">Hello, {{ user.username }}</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-3 px-2" aria-labelledby="userDropdown" style="min-width:220px;">
+                                    <li class="px-3 py-2 border-bottom mb-2"><span class="text-muted d-block small">Signed in as</span><strong class="text-dark">{{ user.username }}</strong></li>
+                                    <li><a class="dropdown-item rounded py-2" href="{% url 'profile' %}"><i class="fas fa-user-circle me-3 text-secondary"></i>My Profile</a></li>
+                                    <li><a class="dropdown-item rounded py-2" href="{% url 'orders_page' %}"><i class="fas fa-box me-3 text-secondary"></i>Orders</a></li>
+                                    <li><a class="dropdown-item rounded py-2" href="{% url 'wishlist_page' %}"><i class="fas fa-heart me-3 text-danger"></i>My Wishlist</a></li>
+                                    <li><a class="dropdown-item rounded py-2" href="{% url 'pocket_page' %}"><i class="fas fa-ticket-alt me-3 text-secondary"></i>Pockets</a></li>
+                                    <li><hr class="dropdown-divider my-2"></li>
+                                    <li><a class="dropdown-item rounded py-2 text-danger fw-bold" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="my-auto ms-3"><i class="fas fa-user fa-2x text-secondary"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- HEADER SECTION END -->
+
+    <!-- Existing product search modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg"><div class="modal-content rounded-0">
+            <div class="modal-header"><h5 class="modal-title" id="searchModalLabel">Search Products</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <form action="{% url 'shop_page' %}" method="GET" class="input-group w-100">
+                    <input type="search" name="keywords" class="form-control p-3" placeholder="Search groceries..." aria-label="Search products">
+                    <button type="submit" class="input-group-text p-3"><i class="fa fa-search text-primary"></i></button>
+                </form>
+            </div>
+        </div></div>
+    </div>
+
+    <!-- =========================================================
+         BODY SECTION START
+         Includes customer summary, personal details, address book
+         and account shortcuts.
+    ========================================================== -->
+
+    <!-- Page heading and breadcrumb -->
+    <section class="container-fluid profile-hero">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <div>
+                    <p class="text-secondary fw-bold mb-2">YOUR GROCERY GUIDE ACCOUNT</p>
+                    <h1 class="display-5 text-primary mb-2">My Profile</h1>
+                    <p class="mb-0 text-muted">Manage your personal details and delivery information.</p>
+                </div>
+                <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-primary">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+                </ol></nav>
+            </div>
+        </div>
+    </section>
+
+    <main class="container profile-shell">
+        <!-- Django messages for successful updates or validation errors -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Left profile summary and navigation column -->
+            <aside class="col-lg-4 col-xl-3">
+                <div class="profile-card text-center">
+                    <div class="profile-avatar mx-auto mb-3"><i class="fas fa-user"></i></div>
+                    <h4 class="mb-1">{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h4>
+                    <p class="text-muted small mb-3">{{ user.email|default:"Email address not added" }}</p>
+                    <span class="badge bg-light text-success px-3 py-2"><i class="fas fa-check-circle me-1"></i>Registered Customer</span>
+                    <hr>
+                    <div class="row g-2 text-start">
+                        <div class="col-6"><div class="profile-stat"><i class="fas fa-box d-block mb-2"></i><strong class="d-block">{{ total_orders|default:"0" }}</strong><small class="text-muted">Orders</small></div></div>
+                        <div class="col-6"><div class="profile-stat"><i class="fas fa-heart d-block mb-2"></i><strong class="d-block">{{ wishlist_count|default:"0" }}</strong><small class="text-muted">Wishlist</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Shortcuts to account sections and existing pages -->
+                <div class="profile-card profile-nav">
+                    <h6 class="fw-bold mb-3">MY ACCOUNT</h6>
+                    <div class="list-group">
+                        <a href="#personal-information" class="list-group-item active"><i class="fas fa-user-circle me-2"></i>Personal Information</a>
+                        <a href="#address-book" class="list-group-item"><i class="fas fa-map-marker-alt me-2"></i>My Addresses</a>
+                        <a href="{% url 'orders_page' %}" class="list-group-item"><i class="fas fa-box me-2"></i>My Orders</a>
+                        <a href="{% url 'wishlist_page' %}" class="list-group-item"><i class="fas fa-heart me-2"></i>My Wishlist</a>
+                        <a href="{% url 'pocket_page' %}" class="list-group-item"><i class="fas fa-ticket-alt me-2"></i>My Pockets</a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right content column -->
+            <div class="col-lg-8 col-xl-9">
+
+                <!-- Personal details: view should process first_name, last_name and email -->
+                <section class="profile-card" id="personal-information">
+                    <div class="section-heading">
+                        <div><h4><i class="fas fa-user-edit text-primary me-2"></i>Personal Information</h4><p class="text-muted small mb-0 mt-1">Keep your account details up to date.</p></div>
+                    </div>
+                    <form method="POST" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="profile">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label for="first_name" class="form-label">First Name</label><input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" placeholder="Enter first name"></div>
+                            <div class="col-md-6"><label for="last_name" class="form-label">Last Name</label><input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" placeholder="Enter last name"></div>
+                            <div class="col-md-6"><label for="username" class="form-label">Username</label><input type="text" class="form-control" id="username" value="{{ user.username }}" readonly><small class="text-muted">Username cannot be changed here.</small></div>
+                            <div class="col-md-6"><label for="email" class="form-label">Email Address</label><input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" placeholder="name@example.com"></div>
+                            <div class="col-12 text-end pt-2"><button type="submit" class="btn btn-primary rounded-pill px-4 py-2"><i class="fas fa-save me-2"></i>Save Changes</button></div>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Saved delivery addresses; pass the logged-in user's addresses as "addresses" -->
+                <section class="profile-card" id="address-book">
+                    <div class="section-heading">
+                        <div><h4><i class="fas fa-map-marker-alt text-primary me-2"></i>My Addresses</h4><p class="text-muted small mb-0 mt-1">Manage the addresses where you receive your groceries.</p></div>
+                        <a href="#add-address" class="btn btn-outline-primary rounded-pill px-3"><i class="fas fa-plus me-1"></i>Add New Address</a>
+                    </div>
+                    <div class="row g-3">
+                        {% for address in addresses %}
+                            <div class="col-md-6">
+                                <div class="address-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <span class="address-icon"><i class="fas fa-home"></i></span>
+                                        {% if address.is_default %}<span class="badge bg-success">Default Address</span>{% endif %}
+                                    </div>
+                                    <h6 class="fw-bold mb-2">{{ address.full_name }}</h6>
+                                    <p class="text-muted small mb-1">{{ address.phone }}</p>
+                                    <p class="mb-3">{{ address.address }}{% if address.landmark %}, {{ address.landmark }}{% endif %}<br>{{ address.city }}, {{ address.state }} - {{ address.pincode }}<br>{{ address.country|default:"India" }}</p>
+                                    <!-- Replace these anchors with your real address edit/delete URL names -->
+                                    
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12"><div class="text-center bg-light rounded p-4">
+                                <i class="fas fa-map-marked-alt fa-3x text-secondary mb-3"></i>
+                                <h6 class="fw-bold">No saved addresses yet</h6>
+                                <p class="text-muted mb-3">Add a delivery address to make your next checkout faster.</p>
+                                <a href="#add-address" class="btn btn-primary rounded-pill px-4"><i class="fas fa-plus me-2"></i>Add Your First Address</a>
+                            </div></div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- Address creation form; process the "address" form_type in the profile view -->
+                <section class="profile-card" id="add-address">
+                    <div class="section-heading"><div><h4><i class="fas fa-plus-circle text-primary me-2"></i>Add a New Address</h4><p class="text-muted small mb-0 mt-1">Enter a complete address for accurate delivery.</p></div></div>
+                    <form method="POST" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="address">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label for="address_full_name" class="form-label">Full Name *</label><input type="text" class="form-control" id="address_full_name" name="full_name" value="{{ user.get_full_name }}" required></div>
+                            <div class="col-md-6"><label for="address_phone" class="form-label">Phone Number *</label><input type="tel" class="form-control" id="address_phone" name="phone" placeholder="10-digit mobile number" pattern="[0-9+\\-\\s]{10,15}" required></div>
+                            <div class="col-12"><label for="address_line" class="form-label">Full Address *</label><textarea class="form-control" id="address_line" name="address" rows="2" placeholder="House no., building, street, area" required></textarea></div>
+                            <div class="col-md-6"><label for="landmark" class="form-label">Landmark</label><input type="text" class="form-control" id="landmark" name="landmark" placeholder="Nearby landmark (optional)"></div>
+                            <div class="col-md-6"><label for="city" class="form-label">City *</label><input type="text" class="form-control" id="city" name="city" required></div>
+                            <div class="col-md-6"><label for="state" class="form-label">State / Union Territory *</label>
+                                <select class="form-select" id="state" name="state" required>
+                                    <option value="">Select State</option>
+                                    {% for value, label in state_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6"><label for="pincode" class="form-label">PIN Code *</label><input type="text" class="form-control" id="pincode" name="pincode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit PIN code" required></div>
+                            <div class="col-md-6"><label for="country" class="form-label">Country</label><input type="text" class="form-control" id="country" name="country" value="India" readonly></div>
+                            <div class="col-12"><button type="submit" class="btn btn-primary rounded-pill px-4 py-2"><i class="fas fa-map-marker-alt me-2"></i>Save Address</button></div>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Password management shortcut -->
+                <section class="profile-card">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div><h5 class="fw-bold mb-1"><i class="fas fa-lock text-primary me-2"></i>Account Security</h5><p class="text-muted small mb-0">Update your password to help keep your account secure.</p></div>
+                        <a href="{% url 'password_change' %}" class="btn btn-outline-primary rounded-pill px-4">Change Password</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <!-- BODY SECTION END -->
+
+    <!-- =========================================================
+         FOOTER SECTION START
+         Footer layout and branding are consistent with Grocery Guide.
+    ========================================================== -->
+    <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+        <div class="container py-5">
+            <div class="pb-4 mb-4" style="border-bottom:1px solid rgba(226,175,24,.5);">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-3"><a href="{% url 'home' %}" class="text-decoration-none"><h1 class="text-primary mb-0">Grocery Guide</h1><p class="text-secondary mb-0">Fresh products</p></a></div>
+                    <div class="col-lg-6"><p class="text-light mb-0">Your one-stop shop for fresh groceries, everyday essentials and smarter shopping.</p></div>
+                    <div class="col-lg-3 text-lg-end">
+                        <a href="#" class="btn btn-outline-secondary rounded-circle me-2" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-secondary rounded-circle me-2" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn btn-outline-secondary rounded-circle" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-5">
+                <div class="col-lg-4 col-md-6"><h4 class="text-light mb-3">Why People Like Us!</h4><p class="mb-4">Grocery Guide helps you discover fresh products and manage everyday grocery shopping with ease.</p><a href="{% url 'shop_page' %}" class="btn border-secondary py-2 px-4 rounded-pill text-primary">Shop Now</a></div>
+                <div class="col-lg-2 col-md-6"><h4 class="text-light mb-3">Quick Links</h4><a class="btn-link d-block text-white-50 mb-2" href="{% url 'home' %}">Home</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'shop_page' %}">Shop</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'cart_page' %}">Shop Cart</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'guide' %}">Guide</a></div>
+                <div class="col-lg-3 col-md-6"><h4 class="text-light mb-3">Customer Account</h4><a class="btn-link d-block text-white-50 mb-2" href="{% url 'profile' %}">My Profile</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'orders_page' %}">My Orders</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'wishlist_page' %}">My Wishlist</a><a class="btn-link d-block text-white-50 mb-2" href="{% url 'contact' %}">Contact Us</a></div>
+                <div class="col-lg-3 col-md-6"><h4 class="text-light mb-3">Contact</h4><p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Saltlake, Sector V</p><p class="mb-2"><i class="fas fa-envelope me-3"></i>groceryguideai@gmail.com</p></div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright strip -->
+    <div class="container-fluid copyright bg-dark py-4">
+        <div class="container"><div class="row">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0"><span class="text-light"><a href="{% url 'home' %}" class="text-light text-decoration-none"><i class="fas fa-copyright text-light me-2"></i>Grocery Guide</a>, All rights reserved.</span></div>
+            <div class="col-md-6 my-auto text-center text-md-end text-white">Fresh shopping, made simple.</div>
+        </div></div>
+    </div>
+    <!-- FOOTER SECTION END -->
+
+    <!-- Back-to-top button -->
+    <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top" aria-label="Back to top"><i class="fa fa-arrow-up"></i></a>
+
+    <!-- =========================================================
+         JAVASCRIPT SECTION
+         Loads the same site libraries and enables smooth profile links.
+    ========================================================== -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        // Smooth scrolling for the profile page's in-page navigation links.
+        document.querySelectorAll('.profile-nav a[href^="#"]').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    event.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+<!-- AI Bot Floating Icon -->
+<div class="ai-bot-wrapper-fixed" id="aiBotIcon" onclick="toggleChatSidebar(event)">
+    <img src="{% static 'img/aibot.png' %}" alt="AI Guide" class="jumping-ai-icon-fixed">
+</div>
+
+<!-- AI Chat Sidebar Panel -->
+<div id="aiChatSidebar" class="ai-chat-sidebar">
+    <div class="chat-container-direct">
+        <div class="chat-header-direct">
+            <img src="{% static 'img/aibot.png' %}" class="bot-avatar-direct" alt="AI Guide">
+            <span>AI Guide</span>
+            <button onclick="toggleChatSidebar(event)" class="close-sidebar-btn">&times;</button>
+        </div>
+        <div class="chat-messages-direct" id="aiChatMessages">
+            <div class="welcome-msg-direct">
+                Hello! I am <strong>AI Guide</strong>. Ask me What do you need today? <em>"I can help you with order"</em> or help you plan recipes within your budget!
+            </div>
+        </div>
+        <div class="chat-input-area-direct">
+            <input type="text" id="aiChatInput" class="form-control me-2" placeholder="Ask AI Guide anything...">
+            <button type="button" id="aiChatMicBtn" class="btn btn-outline-secondary me-2 px-3" title="Speak to AI Guide">
+                <i class="fa fa-microphone text-secondary" id="aiChatMicIcon"></i>
+            </button>
+            <button id="aiChatSendBtn" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- SIDEBAR STYLING RULES -->
+<style>
+    .ai-bot-wrapper-fixed {
+        position: fixed !important;
+        bottom: 30px !important;
+        left: 30px !important;
+        z-index: 999998 !important;
+        width: 75px !important;
+        height: auto !important;
+        cursor: pointer !important;
+    }
+
+    .jumping-ai-icon-fixed {
+        width: 100% !important;
+        height: auto !important;
+        filter: drop-shadow(2px 8px 12px rgba(0,0,0,0.25)) !important;
+        animation: bounceBotWidget 1.2s infinite alternate ease-in-out !important;
+    }
+
+    .ai-chat-sidebar {
+        position: fixed;
+        top: 0;
+        left: -420px;
+        width: 400px;
+        height: 100vh;
+        background: white;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+        z-index: 999999 !important;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .ai-chat-sidebar.open {
+        left: 0;
+    }
+
+    .chat-container-direct {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .chat-header-direct {
+        background-color: #81c408;
+        color: white;
+        padding: 20px 15px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+
+    .bot-avatar-direct {
+        width: 35px;
+        height: auto;
+    }
+
+    .close-sidebar-btn {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .chat-messages-direct {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+    }
+
+    .welcome-msg-direct {
+        background-color: #e9ecef;
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 85%;
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .user-msg-direct {
+        text-align: right;
+        margin-bottom: 10px;
+    }
+
+    .user-msg-direct span {
+        background-color: #81c408;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        max-width: 85%;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .bot-reply-direct {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .bot-reply-direct span {
+        background-color: #ffffff;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        max-width: 85%;
+        font-size: 14px;
+    }
+
+    .chat-input-area-direct {
+        display: flex;
+        padding: 15px;
+        border-top: 1px solid #eee;
+        background: white;
+    }
+
+    @keyframes bounceBotWidget {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-22px); }
+    }
+</style>
+
+<!-- SIDEBAR TOGGLE, SPEECH-TO-TEXT & API CONNECTION SCRIPT -->
+<script>
+    function toggleChatSidebar(event) {
+        if (event) event.stopPropagation();
+        var sidebar = document.getElementById("aiChatSidebar");
+        sidebar.classList.toggle("open");
+    }
+
+    document.addEventListener("click", function(event) {
+        var sidebar = document.getElementById("aiChatSidebar");
+        var iconButton = document.getElementById("aiBotIcon");
+        
+        if (sidebar.classList.contains("open")) {
+            if (!sidebar.contains(event.target) && !iconButton.contains(event.target)) {
+                sidebar.classList.remove("open");
+            }
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatInput = document.getElementById("aiChatInput");
+        const sendBtn = document.getElementById("aiChatSendBtn");
+        const chatMessages = document.getElementById("aiChatMessages");
+        const chatMicBtn = document.getElementById("aiChatMicBtn");
+        const chatMicIcon = document.getElementById("aiChatMicIcon");
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement("div");
+            if (sender === "user") {
+                msgDiv.className = "user-msg-direct";
+                msgDiv.innerHTML = `<span>${text}</span>`;
+            } else {
+                msgDiv.className = "bot-reply-direct";
+                msgDiv.innerHTML = `<span>${text}</span>`;
+            }
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendAiMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            appendMessage(message, "user");
+            chatInput.value = "";
+            sendBtn.disabled = true;
+
+            // Animated status messages sequence
+            const statusMessages = [
+                "AI is analyzing...", 
+                "AI is searching...", 
+                "AI is checking stock...", 
+                "Almost there..."
+            ];
+            let statusIdx = 0;
+
+            const statusDiv = document.createElement("div");
+            statusDiv.className = "bot-reply-direct text-muted fst-italic";
+            statusDiv.innerHTML = `<span style="display: inline-block; animation: pulseStatus 1.2s infinite alternate ease-in-out;">${statusMessages[0]}</span>`;
+            chatMessages.appendChild(statusDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const statusInterval = setInterval(() => {
+                statusIdx = (statusIdx + 1) % statusMessages.length;
+                const spanEl = statusDiv.querySelector("span");
+                if (spanEl) spanEl.innerText = statusMessages[statusIdx];
+            }, 1200);
+
+            try {
+                const response = await fetch("{% url 'ai_chat_api' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+
+                const data = await response.json();
+                
+                clearInterval(statusInterval);
+                statusDiv.remove();
+
+                appendMessage(data.reply || "No response received.", "bot");
+            } catch (error) {
+                clearInterval(statusInterval);
+                statusDiv.remove();
+                console.error("Fetch error:", error);
+                appendMessage("Network error: Could not reach AI Guide.", "bot");
+            } finally {
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        if (sendBtn && chatInput) {
+            sendBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                sendAiMessage();
+            });
+
+            chatInput.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    sendAiMessage();
+                }
+            });
+        }
+
+        // Speech-to-Text for AI Chat
+        const ChatSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (ChatSpeechRecognition && chatMicBtn) {
+            const chatRecognition = new ChatSpeechRecognition();
+            chatRecognition.continuous = false;
+            chatRecognition.interimResults = false;
+            chatRecognition.lang = "en-IN";
+
+            chatMicBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                try {
+                    chatRecognition.start();
+                } catch (err) {
+                    console.log("Voice input already active:", err);
+                }
+            });
+
+            chatRecognition.onstart = function () {
+                chatMicIcon.className = "fa fa-spinner fa-spin text-danger";
+            };
+
+            chatRecognition.onresult = function (event) {
+                const spokenText = event.results[0][0].transcript.replace(/\.$/, "");
+                chatInput.value = spokenText;
+                sendAiMessage();
+            };
+
+            chatRecognition.onerror = function (event) {
+                console.error("Chat speech error:", event.error);
+                chatMicIcon.className = "fa fa-microphone text-secondary";
+            };
+
+            chatRecognition.onend = function () {
+                chatMicIcon.className = "fa fa-microphone text-secondary";
+            };
+        } else if (chatMicBtn) {
+            chatMicBtn.style.display = "none";
+        }
+    });
+</script>
+
+<!-- Add keyframe animation style for the pulsing loading text -->
+<style>
+    @keyframes pulseStatus {
+        0% { opacity: 0.4; transform: scale(0.98); }
+        100% { opacity: 1; transform: scale(1.02); }
+    }
+</style>
+
+</body>
+</html>

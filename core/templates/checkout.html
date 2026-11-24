@@ -1,0 +1,1399 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo.png' %}">
+    <title>Checkout - Grocery Guide</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta
+      name="description"
+      content="Complete your Grocery Guide order securely."
+    />
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icon Font Stylesheet -->
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap and Existing Grocery Guide Stylesheets -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+
+    <!-- Checkout-specific styles -->
+    <style>
+      :root {
+        --gg-primary: #81c408;
+        --gg-secondary: #ffb524;
+        --gg-dark: #45595b;
+        --gg-light: #f4f6f8;
+      }
+
+      body {
+        font-family: "Open Sans", sans-serif;
+        color: var(--gg-dark);
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        font-family: "Raleway", sans-serif;
+      }
+      .checkout-hero {
+        background: linear-gradient(120deg, #f7fbef, #fff);
+        padding: 155px 0 45px;
+      }
+      .checkout-card {
+        background: #fff;
+        border: 1px solid #e8ecef;
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, 0.035);
+      }
+      .checkout-card h4 {
+        color: var(--gg-dark);
+        font-weight: 700;
+        margin-bottom: 22px;
+      }
+      .step-number {
+        display: inline-flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--gg-primary);
+        color: #fff;
+        margin-right: 10px;
+        font-weight: 700;
+      }
+      .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .form-control,
+      .form-select {
+        min-height: 48px;
+        border-radius: 8px;
+        border-color: #dfe5e8;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--gg-primary);
+        box-shadow: 0 0 0 0.2rem rgba(129, 196, 8, 0.12);
+      }
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 15px;
+        border: 1px solid #e3e8eb;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-bottom: 12px;
+        transition: 0.2s ease;
+      }
+      .payment-option:has(input:checked) {
+        border-color: var(--gg-primary);
+        background: #f8fcef;
+      }
+      .payment-option input {
+        accent-color: var(--gg-primary);
+      }
+      .payment-icon {
+        width: 42px;
+        text-align: center;
+        font-size: 1.35rem;
+        color: var(--gg-primary);
+      }
+      .order-item {
+        display: flex;
+        gap: 13px;
+        padding: 14px 0;
+        border-bottom: 1px solid #edf0f2;
+      }
+      .order-item img {
+        width: 66px;
+        height: 66px;
+        object-fit: cover;
+        border-radius: 9px;
+        background: var(--gg-light);
+      }
+      .order-item:last-child {
+        border-bottom: 0;
+      }
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 12px 0;
+      }
+      .grand-total {
+        border-top: 1px dashed #cfd7da;
+        padding-top: 17px;
+        margin-top: 17px;
+        font-size: 1.15rem;
+        font-weight: 800;
+      }
+      .secure-note {
+        background: #f5faed;
+        border-radius: 9px;
+        padding: 12px;
+        color: #527b13;
+        font-size: 0.86rem;
+      }
+      .place-order-btn {
+        min-height: 54px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .required-note {
+        font-size: 0.82rem;
+        color: #7b858a;
+      }
+      @media (max-width: 767px) {
+        .checkout-hero {
+          padding-top: 130px;
+        }
+        .checkout-card {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- =========================================================
+         HEADER SECTION START
+         Reuses Grocery Guide topbar and navigation from the main site.
+    ========================================================== -->
+
+    <!-- Top information bar -->
+    <div class="container-fluid fixed-top">
+      <div class="container topbar bg-primary d-none d-lg-block">
+        <div class="d-flex justify-content-between">
+          <div class="top-info ps-2">
+            <small class="me-3">
+              <i class="fas fa-map-marker-alt me-2 text-secondary"></i>
+              <a href="#" class="text-white">Saltlake, Sector V</a>
+            </small>
+            <small class="me-3">
+              <i class="fas fa-envelope me-2 text-secondary"></i>
+              <a href="mailto:groceryguideai@gmail.com" class="text-white"
+                >groceryguideai@gmail.com</a
+              >
+            </small>
+          </div>
+          <div class="top-link pe-2">
+            <a href="#" class="text-white"
+              ><small class="text-white mx-2">Privacy Policy</small>/</a
+            >
+            <a href="#" class="text-white"
+              ><small class="text-white mx-2">Terms of Use</small>/</a
+            >
+            <a href="#" class="text-white"
+              ><small class="text-white ms-2">Sales and Refunds</small></a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Main navigation -->
+      <div class="container px-0">
+        <nav class="navbar navbar-light bg-white navbar-expand-xl">
+          <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center"><img src="{% static 'img/logo.png' %}" alt="Grocery Guide" style="height: 80px; width: auto;" class="me-2"><h1 class="text-primary display-6 mb-0">Grocery Guide
+
+          </h1></a>
+          </a>
+
+          <button
+            class="navbar-toggler py-2 px-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="fa fa-bars text-primary"></span>
+          </button>
+
+          <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+            <div class="navbar-nav mx-auto">
+              <a href="{% url 'home' %}" class="nav-item nav-link">Home</a>
+              <a href="{% url 'shop_page' %}" class="nav-item nav-link">Shop</a>
+              <a href="{% url 'cart_page' %}" class="nav-item nav-link"
+                >Shop Cart</a
+              >
+              <a
+                href="{% url 'checkout' %}"
+                class="nav-item nav-link active"
+                >Checkout</a
+              >
+              <a href="{% url 'contact' %}" class="nav-item nav-link"
+                >Contact</a
+              >
+              <a href="{% url 'guide' %}" class="nav-item nav-link">Guide</a>
+            </div>
+
+            <div class="d-flex m-3 me-0 align-items-center">
+              <a
+                href="{% url 'cart_page' %}"
+                class="position-relative me-4 my-auto"
+                aria-label="Shopping cart"
+              >
+                <i class="fa fa-shopping-bag fa-2x text-primary"></i>
+                <span
+                  class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                  style="top: -5px; left: 15px; height: 20px; min-width: 20px"
+                >
+                  {{ cart_count|default:0 }}
+                </span>
+              </a>
+
+{% if user.is_authenticated %}
+                                <div class="dropdown my-auto ms-3">
+                                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user fa-lg me-2 text-primary"></i>
+                                        <span class="fw-bold small">Hello, {{ user.username }}</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-3 px-2" aria-labelledby="userDropdown" style="min-width: 220px;">
+                                        <li class="px-3 py-2 border-bottom mb-2">
+                                            <span class="text-muted d-block small">Signed in as</span>
+                                            <strong class="text-dark">{{ user.username }}</strong>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded py-2 d-flex align-items-center" href="{% url "profile" %}">
+                                                <i class="fas fa-user-circle me-3 text-secondary"></i> My Profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded py-2 d-flex align-items-center" href="{% url 'orders_page' %}">
+                                                <i class="fas fa-box me-3 text-secondary"></i> Orders
+                                            </a>
+                                        </li>
+                                        
+<li>
+<a class="dropdown-item rounded py-2 d-flex align-items-center" href="{% url 'wishlist_page' %}">
+        <i class="fas fa-heart me-3 text-danger"></i> My Wishlist
+    </a>
+</li>
+
+<li>
+                                            <a class="dropdown-item rounded py-2 d-flex align-items-center" href="{% url 'pocket_page' %}">
+                                                <i class="fas fa-ticket-alt me-3 text-secondary"></i> Pockets
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-2"></li>
+                                        <li>
+                                            <a class="dropdown-item rounded py-2 text-danger d-flex align-items-center fw-bold" href="{% url 'logout' %}">
+                                                <i class="fas fa-sign-out-alt me-3"></i> Logout
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="my-auto ms-3">
+                                    <i class="fas fa-user fa-2x text-secondary"></i>
+                                </a>
+                            {% endif %}
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Checkout page title and breadcrumb -->
+    <section class="checkout-hero">
+      <div class="container">
+        <div class="text-center">
+          <p class="text-primary fw-bold mb-2">
+            SECURE YOUR ITEMS
+          </p>
+          <h1 class="display-5 fw-bold mb-3">Complete Your Order</h1>
+          <p class="text-muted mb-3">
+            You're just a few steps away from fresh groceries at your doorstep.
+          </p>
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         BODY SECTION START
+         Contains billing, delivery, payment and order summary.
+    ========================================================== -->
+
+    <main class="container py-5">
+      {% if messages %}
+      <!-- Django messages: success, warning or error feedback -->
+      {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+
+      <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+        {% csrf_token %}
+
+        <div class="row g-4">
+          <!-- Left column: customer and payment information -->
+          <div class="col-lg-7">
+            <!-- 1. Billing information -->
+            <section class="checkout-card" aria-labelledby="billingHeading">
+              <h4 id="billingHeading">
+                <span class="step-number">1</span>Billing Information
+              </h4>
+              <p class="required-note mb-4">
+                Fields marked with * are required.
+              </p>
+              
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label">First Name *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="firstName"
+                    name="first_name"
+                    value="{{ user.first_name|default:'' }}"
+                    autocomplete="given-name"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label">Last Name *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="lastName"
+                    name="last_name"
+                    value="{{ user.last_name|default:'' }}"
+                    autocomplete="family-name"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="email" class="form-label">Email Address *</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    value="{{ user.email|default:'' }}"
+                    autocomplete="email"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="phone" class="form-label">Phone Number *</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="phone"
+                    name="phone"
+                    placeholder="+91 98765 43210"
+                    autocomplete="tel"
+                    pattern="[0-9+\-\s]{8,18}"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label for="address" class="form-label"
+                    >Street Address *</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="address"
+                    name="address"
+                    placeholder="House no., building, street and area"
+                    autocomplete="street-address"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="landmark" class="form-label"
+                    >Landmark (optional)</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="landmark"
+                    name="landmark"
+                    placeholder="Nearby landmark"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="city" class="form-label">City *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    autocomplete="address-level2"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="state" class="form-label">State *</label>
+                  <select
+                    class="form-select"
+                    id="state"
+                    name="state"
+                    autocomplete="address-level1"
+                    required
+                  >
+                    <option value="">Select state</option>
+                    <option>Andhra Pradesh</option>
+                    <option>Assam</option>
+                    <option>Bihar</option>
+                    <option>Delhi</option>
+                    <option>Gujarat</option>
+                    <option>Karnataka</option>
+                    <option>Kerala</option>
+                    <option>Maharashtra</option>
+                    <option>Odisha</option>
+                    <option>Punjab</option>
+                    <option>Rajasthan</option>
+                    <option>Tamil Nadu</option>
+                    <option>Telangana</option>
+                    <option>Uttar Pradesh</option>
+                    <option selected>West Bengal</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="pincode" class="form-label">PIN Code *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="pincode"
+                    name="pincode"
+                    inputmode="numeric"
+                    pattern="[0-9]{6}"
+                    maxlength="6"
+                    autocomplete="postal-code"
+                    placeholder="6-digit PIN code"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label for="country" class="form-label">Country</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="country"
+                    name="country"
+                    value="India"
+                    readonly
+                  />
+                </div>
+              </div>
+            </section>
+
+            <!-- 2. Delivery preferences -->
+            <section class="checkout-card" aria-labelledby="deliveryHeading">
+              <h4 id="deliveryHeading">
+                <span class="step-number">2</span>Delivery Information
+              </h4>
+              <div class="mb-3">
+                <label for="deliverySlot" class="form-label"
+                  >Preferred Delivery Slot *</label
+                >
+                <select
+                  class="form-select"
+                  id="deliverySlot"
+                  name="delivery_slot"
+                  required
+                >
+                  <option value="">Choose a delivery slot</option>
+                  <option value="morning">Morning (8:00 AM – 12:00 PM)</option>
+                  <option value="afternoon">
+                    Afternoon (12:00 PM – 4:00 PM)
+                  </option>
+                  <option value="evening">Evening (4:00 PM – 8:00 PM)</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="deliveryInstructions" class="form-label"
+                  >Delivery Instructions (optional)</label
+                >
+                <textarea
+                  class="form-control"
+                  id="deliveryInstructions"
+                  name="delivery_instructions"
+                  rows="3"
+                  placeholder="Add a note for the delivery partner..."
+                ></textarea>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="sameAddress"
+                  name="billing_same_as_shipping"
+                  value="yes"
+                  checked
+                />
+                <label class="form-check-label" for="sameAddress">
+                  Billing address is the same as delivery address
+                </label>
+              </div>
+            </section>
+
+            <!-- 3. Payment method selection -->
+            <section class="checkout-card" aria-labelledby="paymentHeading">
+              <h4 id="paymentHeading">
+                <span class="step-number">3</span>Payment Method
+              </h4>
+              <p class="text-muted small mb-3">
+                Select your preferred payment method. Payment details are handled by the payment provider.</p>
+                <!-- Option 1: Online Payment (Razorpay) -->
+                 <label class="payment-option-card d-flex align-items-center p-3 mb-3 border rounded-3 w-100" style="cursor: pointer;">
+                  <input type="radio" name="payment_method" value="RAZORPAY" class="form-check-input me-3 mt-0" checked>
+                  <i class="fas fa-credit-card fa-lg text-success me-3"></i>
+                <div>  <div class="fw-bold text-dark">Online Payment</div>
+                  <small class="text-muted">Pay securely via UPI, Credit/Debit Card, Net Banking, or Wallet (Razorpay)</small>
+                </div>
+                </label>
+
+<!-- Option 2: Cash on Delivery -->
+<label class="payment-option-card d-flex align-items-center p-3 mb-3 border rounded-3 w-100" style="cursor: pointer;">
+    <input type="radio" name="payment_method" value="COD" class="form-check-input me-3 mt-0">
+    <i class="fas fa-money-bill-wave fa-lg text-success me-3"></i>
+    <div>
+        <div class="fw-bold text-dark">Cash on Delivery</div>
+        <small class="text-muted">Pay when your order arrives, if available for your PIN code</small>
+    </div>
+</label>
+
+              <div class="secure-note mt-3">
+                <i class="fas fa-lock me-2"></i>
+                Your checkout connection is protected. Never share your UPI PIN,
+                card PIN or OTP with anyone.
+              </div>
+            </section>
+
+            <!-- 4. Optional order notes and policy acknowledgement -->
+            <section class="checkout-card" aria-labelledby="notesHeading">
+              <h4 id="notesHeading">
+                <span class="step-number">4</span>Additional Details
+              </h4>
+              <div class="mb-3">
+                <label for="orderNotes" class="form-label"
+                  >Order Notes (optional)</label
+                >
+                <textarea
+                  class="form-control"
+                  id="orderNotes"
+                  name="order_notes"
+                  rows="3"
+                  placeholder="Any special request about your order?"
+                ></textarea>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="acceptTerms"
+                  name="accept_terms"
+                  value="yes"
+                  required
+                />
+                <label class="form-check-label small" for="acceptTerms">
+                  I have read and agree to the
+                  <a href="#">Terms and Conditions</a> and
+                  <a href="#">Privacy Policy</a>. *
+                </label>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right column: cart items, coupon and final amount -->
+          <aside class="col-lg-5" aria-label="Order summary">
+            <div class="checkout-card">
+              <h4>
+                <i class="fas fa-shopping-basket text-primary me-2"></i>Your
+                Order
+              </h4>
+
+              <!-- Cart item loop: adapt field names if your Cart model differs -->
+              {% for item in cart_items %}
+              <div class="order-item">
+                {% if item.product.image %}
+                <img
+                  src="{{ item.product.image.url }}"
+                  alt="{{ item.product.title }}"
+                />
+                {% else %}
+                <img
+                  src="{% static 'img/fruite-item-5.jpg' %}"
+                  alt="{{ item.product.title }}"
+                />
+                {% endif %}
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ item.product.title }}</h6>
+                  <small class="text-muted"
+                    >Quantity: {{ item.quantity }}</small
+                  >
+                  <div class="fw-bold text-dark mt-1">
+                    ₹{{ item.subtotal|default:item.total_price }}
+                  </div>
+                </div>
+              </div>
+              {% empty %}
+              <!-- Fallback for an empty cart -->
+              <div class="text-center py-4">
+                <i class="fas fa-shopping-basket fa-2x text-muted mb-3"></i>
+                <p class="text-muted mb-3">Your cart is currently empty.</p>
+                <a
+                  href="{% url 'shop_page' %}"
+                  class="btn btn-outline-primary rounded-pill px-4"
+                  >Continue Shopping</a
+                >
+              </div>
+              {% endfor %}
+
+              <!-- Coupon code form; connect this endpoint to your coupon validation view -->
+              <div class="mt-4">
+                <label for="couponCode" class="form-label"
+                  >Have a coupon code?</label
+                >
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="couponCode"
+                    name="coupon_code"
+                    value="{{ applied_coupon|default:'' }}"
+                    placeholder="Enter coupon code"
+                  />
+                  <button
+                    class="btn btn-outline-primary"
+                    type="button"
+                    id="applyCouponBtn"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <small
+                  id="couponFeedback"
+                  class="text-muted d-block mt-2"
+                  aria-live="polite"
+                >
+                  Enter a valid code to check available discounts.
+                </small>
+              </div>
+
+              <!-- Price calculation: values should be calculated and validated on the server -->
+              <div class="mt-4">
+                <div class="price-row">
+                  <span class="text-muted">Subtotal</span>
+                  <strong>₹{{ subtotal|default:"0.00" }}</strong>
+                </div>
+                <div class="price-row">
+                  <span class="text-muted">Discount</span>
+                  <strong class="text-success"
+                    >− ₹{{ discount|default:"0.00" }}</strong
+                  >
+                </div>
+                <div class="price-row">
+                  <span class="text-muted">Delivery Charges</span>
+                  <strong>
+                    {% if delivery_charge == 0 %}
+                    <span class="text-success">FREE</span>
+                    {% else %} ₹{{ delivery_charge|default:"0.00" }} {% endif %}
+                  </strong>
+                </div>
+                <div class="price-row">
+                  <span class="text-muted">Tax / GST</span>
+                  <strong>₹{{ tax_amount|default:"0.00" }}</strong>
+                </div>
+                {% if coupon_discount %}
+                <div class="price-row">
+                  <span class="text-muted">Coupon Savings</span>
+                  <strong class="text-success">− ₹{{ coupon_discount }}</strong>
+                </div>
+                {% endif %}
+                <div class="price-row grand-total">
+                  <span>Total Payable</span>
+                  <span class="text-primary"
+                    >₹{{ grand_total|default:"0.00" }}</span
+                  >
+                </div>
+                <small class="text-muted"
+                  >Inclusive of applicable taxes. Final amount is confirmed by
+                  the server.</small
+                >
+              </div>
+
+              <!-- Submit checkout form -->
+              <button
+                type="submit"
+                class="btn btn-primary w-100 rounded-pill py-3 mt-4 place-order-btn"
+                {%
+                if
+                not
+                cart_items
+                %}disabled{%
+                endif
+                %}
+              >
+                <i class="fas fa-lock me-2"></i>Place Order · ₹{{ grand_total|default:"0.00" }}
+              </button>
+
+              <p class="text-center text-muted small mt-3 mb-0">
+                By placing your order, you agree to our purchase and delivery
+                terms.
+              </p>
+            </div>
+
+            <!-- Checkout reassurance panel -->
+            <div class="checkout-card">
+              <h5 class="mb-3">
+                <i class="fas fa-shield-alt text-primary me-2"></i>Shopping with
+                confidence
+              </h5>
+              <p class="small text-muted mb-2">
+                <i class="fas fa-check-circle text-success me-2"></i>Secure
+                payment processing
+              </p>
+              <p class="small text-muted mb-2">
+                <i class="fas fa-truck text-success me-2"></i>Order tracking and
+                delivery updates
+              </p>
+              <p class="small text-muted mb-0">
+                <i class="fas fa-headset text-success me-2"></i>Customer support
+                when you need it
+              </p>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </main>
+
+    <!-- =========================================================
+         FOOTER SECTION START
+         Footer links and contact information follow the site template.
+    ========================================================== -->
+
+    <footer class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+      <div class="container py-5">
+        <div
+          class="pb-4 mb-4"
+          style="border-bottom: 1px solid rgba(226, 175, 24, 0.5)"
+        >
+          <div class="row g-4 align-items-center">
+            <div class="col-lg-4">
+              <a href="{% url 'home' %}" class="text-decoration-none">
+                <h1 class="text-primary mb-0">Grocery Guide</h1>
+                <p class="text-secondary mb-0">
+                  Fresh products, delivered with care.
+                </p>
+              </a>
+            </div>
+            <div class="col-lg-5">
+              <p class="mb-0">
+                Fresh groceries and everyday essentials, made easy.
+              </p>
+            </div>
+            <div class="col-lg-3">
+              <div class="d-flex justify-content-lg-end pt-2">
+                <a
+                  class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
+                  href="#"
+                  aria-label="Twitter"
+                  ><i class="fab fa-twitter"></i
+                ></a>
+                <a
+                  class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
+                  href="#"
+                  aria-label="Facebook"
+                  ><i class="fab fa-facebook-f"></i
+                ></a>
+                <a
+                  class="btn btn-outline-secondary me-2 btn-md-square rounded-circle"
+                  href="#"
+                  aria-label="YouTube"
+                  ><i class="fab fa-youtube"></i
+                ></a>
+                <a
+                  class="btn btn-outline-secondary btn-md-square rounded-circle"
+                  href="#"
+                  aria-label="LinkedIn"
+                  ><i class="fab fa-linkedin-in"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-5">
+          <div class="col-lg-3 col-md-6">
+            <h5 class="text-light mb-3">About Grocery Guide</h5>
+            <p class="mb-0">
+              Your one-stop shop for fresh groceries and daily essentials. We
+              aim to make shopping simple, convenient and reliable.
+            </p>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5 class="text-light mb-3">Shop Info</h5>
+            <div class="d-flex flex-column">
+              <a class="btn-link" href="#">About Us</a>
+              <a class="btn-link" href="{% url 'contact' %}">Contact Us</a>
+              <a class="btn-link" href="#">Privacy Policy</a>
+              <a class="btn-link" href="#">Terms &amp; Conditions</a>
+              <a class="btn-link" href="#">Return Policy</a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5 class="text-light mb-3">Your Account</h5>
+            <div class="d-flex flex-column">
+              <a class="btn-link" href="{% url 'login' %}">My Account</a>
+              <a class="btn-link" href="{% url 'cart_page' %}">Shopping Cart</a>
+              <a class="btn-link" href="{% url 'orders_page' %}"
+                >Order History</a
+              >
+              <a class="btn-link" href="{% url 'wishlist_page' %}">Wishlist</a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5 class="text-light mb-3">Contact</h5>
+            <p class="mb-2">
+              <i class="fa fa-map-marker-alt me-2"></i>Saltlake, Sector V,
+              Kolkata
+            </p>
+            <p class="mb-2">
+              <i class="fas fa-envelope me-2"></i>groceryguideai@gmail.com
+            </p>
+            <p class="mb-2">
+              <i class="fa fa-phone-alt me-2"></i>Contact support for assistance
+            </p>
+            <p class="mb-2">Payment methods</p>
+            <p class="small mb-0">
+              UPI · Cards · Net Banking · Wallet · Cash on Delivery
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Copyright strip -->
+    <div class="container-fluid copyright bg-dark py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            <span class="text-light">
+              <i class="fas fa-copyright me-2"></i>Grocery Guide, All rights
+              reserved.
+            </span>
+          </div>
+          <div class="col-md-6 text-center text-md-end text-white">
+            <span>Secure checkout · Fresh groceries</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to top button -->
+    <a
+      href="#"
+      class="btn btn-primary border-3 border-primary rounded-circle back-to-top"
+      aria-label="Back to top"
+    >
+      <i class="fa fa-arrow-up"></i>
+    </a>
+
+    <!-- =========================================================
+         JAVASCRIPT SECTION
+         Loads Bootstrap and provides small checkout-page interactions.
+    ========================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Coupon button: this is a UI placeholder. Connect it to a Django
+        // coupon-validation endpoint before using it in production.
+        const couponButton = document.getElementById("applyCouponBtn");
+        const couponInput = document.getElementById("couponCode");
+        const couponFeedback = document.getElementById("couponFeedback");
+
+        if (couponButton) {
+          couponButton.addEventListener("click", function () {
+            const code = couponInput.value.trim();
+            if (!code) {
+              couponFeedback.textContent = "Please enter a coupon code.";
+              couponFeedback.className = "text-danger small d-block mt-2";
+              couponInput.focus();
+              return;
+            }
+            couponFeedback.textContent =
+              "Coupon entered. Connect this button to your server-side coupon validation to apply the discount.";
+            couponFeedback.className = "text-muted small d-block mt-2";
+          });
+        }
+      });
+    </script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const checkoutForm = document.getElementById("checkoutForm");
+    if (!checkoutForm) return;
+
+    const submitButton = checkoutForm.querySelector('button[type="submit"]');
+    const originalButtonHTML = submitButton ? submitButton.innerHTML : "";
+
+    checkoutForm.addEventListener("submit", async function (e) {
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        const methodValue = selectedPayment ? selectedPayment.value.toLowerCase() : "cod";
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        }
+
+        // Cash on Delivery: let the normal form POST proceed
+        if (methodValue === "cod") {
+            return;
+        }
+
+        // Online Payment (UPI / Card / Net Banking / Wallet): trigger Razorpay
+        e.preventDefault();
+        const formData = new FormData(checkoutForm);
+        formData.set("payment_method", "RAZORPAY");
+
+        try {
+            const response = await fetch(checkoutForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            const data = await response.json();
+            if (data.status !== "created") {
+                alert(data.message || "Unable to initiate payment.");
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonHTML;
+                }
+                return;
+            }
+
+            const options = {
+                key: data.razorpay_key_id,
+                amount: data.amount,
+                currency: data.currency,
+                name: "Grocery Guide",
+                description: "Order #" + data.order_id,
+                order_id: data.razorpay_order_id,
+                prefill: {
+                    name: data.customer_name,
+                    email: data.customer_email,
+                    contact: data.customer_phone,
+                    method: methodValue
+                },
+                theme: { color: "#81c408" },
+                modal: {
+                    ondismiss: function () {
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonHTML;
+                        }
+                    }
+                },
+                handler: async function (paymentResponse) {
+                    try {
+                        const verifyRes = await fetch("{% url 'payment_verify' %}", {
+                            method: "POST",
+                            headers: { 
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": "{{ csrf_token }}"  // <--- Added CSRF token header
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: paymentResponse.razorpay_order_id,
+                                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                                razorpay_signature: paymentResponse.razorpay_signature
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+                        if (verifyData.status === "success") {
+                            window.location.href = verifyData.redirect_url;
+                        } else {
+                            alert("Payment verification failed: " + (verifyData.message || "Unknown error"));
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalButtonHTML;
+                            }
+                        }
+                    } catch (err) {
+                        alert("Network error during payment verification.");
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonHTML;
+                        }
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            alert("Something went wrong while connecting to Razorpay.");
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonHTML;
+            }
+        }
+    });
+});
+
+</script>
+<!-- AI Bot Floating Icon -->
+<div class="ai-bot-wrapper-fixed" id="aiBotIcon" onclick="toggleChatSidebar(event)">
+    <img src="{% static 'img/aibot.png' %}" alt="AI Guide" class="jumping-ai-icon-fixed">
+</div>
+
+<!-- AI Chat Sidebar Panel -->
+<div id="aiChatSidebar" class="ai-chat-sidebar">
+    <div class="chat-container-direct">
+        <div class="chat-header-direct">
+            <img src="{% static 'img/aibot.png' %}" class="bot-avatar-direct" alt="AI Guide">
+            <span>AI Guide</span>
+            <button onclick="toggleChatSidebar(event)" class="close-sidebar-btn">&times;</button>
+        </div>
+        <div class="chat-messages-direct" id="aiChatMessages">
+            <div class="welcome-msg-direct">
+                Hello! I am <strong>AI Guide</strong>. Ask me What do you need today? <em>"I can help you with order"</em> or help you plan recipes within your budget!
+            </div>
+        </div>
+        <div class="chat-input-area-direct">
+            <input type="text" id="aiChatInput" class="form-control me-2" placeholder="Ask AI Guide anything...">
+            <button type="button" id="aiChatMicBtn" class="btn btn-outline-secondary me-2 px-3" title="Speak to AI Guide">
+                <i class="fa fa-microphone text-secondary" id="aiChatMicIcon"></i>
+            </button>
+            <button id="aiChatSendBtn" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- SIDEBAR STYLING RULES -->
+<style>
+    .ai-bot-wrapper-fixed {
+        position: fixed !important;
+        bottom: 30px !important;
+        left: 30px !important;
+        z-index: 999998 !important;
+        width: 75px !important;
+        height: auto !important;
+        cursor: pointer !important;
+    }
+
+    .jumping-ai-icon-fixed {
+        width: 100% !important;
+        height: auto !important;
+        filter: drop-shadow(2px 8px 12px rgba(0,0,0,0.25)) !important;
+        animation: bounceBotWidget 1.2s infinite alternate ease-in-out !important;
+    }
+
+    .ai-chat-sidebar {
+        position: fixed;
+        top: 0;
+        left: -420px;
+        width: 400px;
+        height: 100vh;
+        background: white;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+        z-index: 999999 !important;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .ai-chat-sidebar.open {
+        left: 0;
+    }
+
+    .chat-container-direct {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .chat-header-direct {
+        background-color: #81c408;
+        color: white;
+        padding: 20px 15px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+
+    .bot-avatar-direct {
+        width: 35px;
+        height: auto;
+    }
+
+    .close-sidebar-btn {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .chat-messages-direct {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+    }
+
+    .welcome-msg-direct {
+        background-color: #e9ecef;
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 85%;
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .user-msg-direct {
+        text-align: right;
+        margin-bottom: 10px;
+    }
+
+    .user-msg-direct span {
+        background-color: #81c408;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        max-width: 85%;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .bot-reply-direct {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .bot-reply-direct span {
+        background-color: #ffffff;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        max-width: 85%;
+        font-size: 14px;
+    }
+
+    .chat-input-area-direct {
+        display: flex;
+        padding: 15px;
+        border-top: 1px solid #eee;
+        background: white;
+    }
+
+    @keyframes bounceBotWidget {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-22px); }
+    }
+</style>
+
+<!-- SIDEBAR TOGGLE, SPEECH-TO-TEXT & API CONNECTION SCRIPT -->
+<script>
+    function toggleChatSidebar(event) {
+        if (event) event.stopPropagation();
+        var sidebar = document.getElementById("aiChatSidebar");
+        sidebar.classList.toggle("open");
+    }
+
+    document.addEventListener("click", function(event) {
+        var sidebar = document.getElementById("aiChatSidebar");
+        var iconButton = document.getElementById("aiBotIcon");
+        
+        if (sidebar.classList.contains("open")) {
+            if (!sidebar.contains(event.target) && !iconButton.contains(event.target)) {
+                sidebar.classList.remove("open");
+            }
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatInput = document.getElementById("aiChatInput");
+        const sendBtn = document.getElementById("aiChatSendBtn");
+        const chatMessages = document.getElementById("aiChatMessages");
+        const chatMicBtn = document.getElementById("aiChatMicBtn");
+        const chatMicIcon = document.getElementById("aiChatMicIcon");
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement("div");
+            if (sender === "user") {
+                msgDiv.className = "user-msg-direct";
+                msgDiv.innerHTML = `<span>${text}</span>`;
+            } else {
+                msgDiv.className = "bot-reply-direct";
+                msgDiv.innerHTML = `<span>${text}</span>`;
+            }
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendAiMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            appendMessage(message, "user");
+            chatInput.value = "";
+            sendBtn.disabled = true;
+
+            // Animated status messages sequence
+            const statusMessages = [
+                "AI is analyzing...", 
+                "AI is searching...", 
+                "AI is checking stock...", 
+                "Almost there..."
+            ];
+            let statusIdx = 0;
+
+            const statusDiv = document.createElement("div");
+            statusDiv.className = "bot-reply-direct text-muted fst-italic";
+            statusDiv.innerHTML = `<span style="display: inline-block; animation: pulseStatus 1.2s infinite alternate ease-in-out;">${statusMessages[0]}</span>`;
+            chatMessages.appendChild(statusDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const statusInterval = setInterval(() => {
+                statusIdx = (statusIdx + 1) % statusMessages.length;
+                const spanEl = statusDiv.querySelector("span");
+                if (spanEl) spanEl.innerText = statusMessages[statusIdx];
+            }, 1200);
+
+            try {
+                const response = await fetch("{% url 'ai_chat_api' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+
+                const data = await response.json();
+                
+                clearInterval(statusInterval);
+                statusDiv.remove();
+
+                appendMessage(data.reply || "No response received.", "bot");
+            } catch (error) {
+                clearInterval(statusInterval);
+                statusDiv.remove();
+                console.error("Fetch error:", error);
+                appendMessage("Network error: Could not reach AI Guide.", "bot");
+            } finally {
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        if (sendBtn && chatInput) {
+            sendBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                sendAiMessage();
+            });
+
+            chatInput.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    sendAiMessage();
+                }
+            });
+        }
+
+        // Speech-to-Text for AI Chat
+        const ChatSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (ChatSpeechRecognition && chatMicBtn) {
+            const chatRecognition = new ChatSpeechRecognition();
+            chatRecognition.continuous = false;
+            chatRecognition.interimResults = false;
+            chatRecognition.lang = "en-IN";
+
+            chatMicBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                try {
+                    chatRecognition.start();
+                } catch (err) {
+                    console.log("Voice input already active:", err);
+                }
+            });
+
+            chatRecognition.onstart = function () {
+                chatMicIcon.className = "fa fa-spinner fa-spin text-danger";
+            };
+
+            chatRecognition.onresult = function (event) {
+                const spokenText = event.results[0][0].transcript.replace(/\.$/, "");
+                chatInput.value = spokenText;
+                sendAiMessage();
+            };
+
+            chatRecognition.onerror = function (event) {
+                console.error("Chat speech error:", event.error);
+                chatMicIcon.className = "fa fa-microphone text-secondary";
+            };
+
+            chatRecognition.onend = function () {
+                chatMicIcon.className = "fa fa-microphone text-secondary";
+            };
+        } else if (chatMicBtn) {
+            chatMicBtn.style.display = "none";
+        }
+    });
+</script>
+
+<!-- Add keyframe animation style for the pulsing loading text -->
+<style>
+    @keyframes pulseStatus {
+        0% { opacity: 0.4; transform: scale(0.98); }
+        100% { opacity: 1; transform: scale(1.02); }
+    }
+</style>
+
+
+  </body>
+</html>
