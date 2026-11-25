@@ -228,10 +228,10 @@
 
                                     {% elif order.status == 'On the way' %}
                                         <span class="badge bg-primary p-2">On the way</span>
-                                    {% elif order.status == 'Pending' %}
-                                        <span class="badge bg-warning text-dark p-2">Pending / Processing</span>
+                                    {% elif order.status == 'Pending' or order.status == 'Picking' %}
+                                        <span class="badge bg-warning text-dark p-2">{{ order.status }}</span>
                                         <div class="mt-2">
-                                            <a href="{% url 'cancel_order' order.id %}" class="btn btn-sm btn-outline-danger">Cancel Order (1min limit)</a>
+                                            <a href="{% url 'cancel_order' order.id %}" class="btn btn-sm btn-outline-danger">Cancel Order</a>
                                         </div>
                                     {% else %}
                                         <span class="badge bg-danger p-2">{{ order.status }}</span>

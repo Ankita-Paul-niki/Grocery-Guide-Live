@@ -1394,6 +1394,117 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 </style>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkoutForm = document.getElementById("checkoutForm");
+        if (!checkoutForm) return;
 
+        const submitButton = checkoutForm.querySelector('button[type="submit"]');
+        const originalButtonHTML = submitButton ? submitButton.innerHTML : "";
+
+        function restoreButton() {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonHTML;
+          }
+        }
+
+        checkoutForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+          const methodValue = selectedPayment ? selectedPayment.value.toLowerCase() : "cod";
+
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+          }
+
+          const formData = new FormData(checkoutForm);
+          formData.set("payment_method", methodValue === "cod" ? "COD" : "RAZORPAY");
+
+          try {
+            const response = await fetch(checkoutForm.action, {
+              method: "POST",
+              body: formData,
+              headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": "{{ csrf_token }}"
+              }
+            });
+
+            const data = await response.json();
+
+            // Redirect directly for Cash on Delivery
+            if (data.status === "success" && data.redirect_url) {
+              window.location.href = data.redirect_url;
+              return;
+            }
+
+            if (data.status !== "created") {
+              alert(data.message || "Unable to place order.");
+              restoreButton();
+              return;
+            }
+
+            const options = {
+              key: data.razorpay_key_id,
+              amount: data.amount,
+              currency: data.currency,
+              name: "Grocery Guide",
+              description: "Order #" + data.order_id,
+              order_id: data.razorpay_order_id,
+              prefill: {
+                name: data.customer_name,
+                email: data.customer_email,
+                contact: data.customer_phone,
+                method: methodValue
+              },
+              theme: { color: "#81c408" },
+              modal: {
+                ondismiss: function () {
+                  restoreButton();
+                }
+              },
+              handler: async function (paymentResponse) {
+                try {
+                  const verifyRes = await fetch("{% url 'payment_verify' %}", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-Requested-With": "XMLHttpRequest",
+                      "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                      razorpay_order_id: paymentResponse.razorpay_order_id,
+                      razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                      razorpay_signature: paymentResponse.razorpay_signature
+                    })
+                  });
+
+                  const verifyData = await verifyRes.json();
+                  if (verifyData.status === "success" && verifyData.redirect_url) {
+                    window.location.href = verifyData.redirect_url;
+                  } else {
+                    alert("Payment verification failed: " + (verifyData.message || "Unknown error"));
+                    restoreButton();
+                  }
+                } catch (err) {
+                  alert("Network error during payment verification.");
+                  restoreButton();
+                }
+              }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+          } catch (err) {
+            alert("Something went wrong while placing your order.");
+            restoreButton();
+          }
+        });
+      });
+    </script>
   </body>
 </html>

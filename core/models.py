@@ -272,7 +272,7 @@ class Order(models.Model):
     # ADD THIS SAVE METHOD TO HANDLE ADMIN MANUAL ASSIGNMENTS
     def save(self, *args, **kwargs):
         if self.delivery_person and self.status == 'Pending':
-            self.status = 'On the way'
+            self.status = 'Picking'
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -530,14 +530,14 @@ def credit_reward_after_delay(order_id):
 @login_required(login_url='login')
 def cancel_order_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    time_diff = timezone.now() - order.created_at
-    
-    if time_diff <= timedelta(minutes=1) and order.status == 'Pending':
+
+    cancellable_statuses = ['Pending', 'Picking']
+    if order.status in cancellable_statuses:
         order.status = 'Cancelled'
         order.save()
-        messages.success(request, "Order successfully cancelled within the 1-minute window.")
+        messages.success(request, "Order cancelled successfully before it went on the way.")
     else:
-        messages.error(request, "Cancellation window of 1 minute has expired.")
+        messages.error(request, "Order can no longer be cancelled once it is on the way or completed.")
     return redirect('orders_page')
 
 
@@ -631,22 +631,6 @@ def delivery_required(view_func):
     return _wrapped_view
 
 
-def assign_delivery_person(order):
-    """Automatically assigns the first available delivery agent who is marked present today."""
-    available_agent = DeliveryProfile.objects.filter(
-        is_attended_today=True, 
-        is_available=True
-    ).first()
-
-    if available_agent:
-        order.delivery_person = available_agent.user
-        order.status = 'On the way'
-        order.save()
-
-        available_agent.is_available = False
-        available_agent.save()
-        return True
-    return False
 
 
 def delivery_login_view(request):
@@ -1284,3 +1268,60 @@ def profile(request):
 
 def checkout_process(request):
     pass
+ACTIVE_ORDER_STATUSES = ['Pending', 'Picking', 'On the way', 'Arrived']
+UNASSIGNABLE_ORDER_STATUSES = ['Delivered', 'Cancelled', 'Awaiting Payment']
+
+
+def _is_partner_free(user):
+    """Returns True if the delivery partner has no active undelivered orders."""
+    return not Order.objects.filter(
+        delivery_person=user,
+        status__in=ACTIVE_ORDER_STATUSES,
+    ).exists()
+
+
+def _sync_partner_availability(user, is_attended_today=None):
+    """Keeps DeliveryProfile.is_available aligned with active orders and attendance."""
+    profile = getattr(user, 'delivery_profile', None)
+    if not profile:
+        return None
+    attended = profile.is_attended_today if is_attended_today is None else is_attended_today
+    profile.is_available = bool(attended and _is_partner_free(user))
+    profile.save()
+    return profile
+
+
+def assign_delivery_person(order):
+    """Assigns a present, free delivery partner without altering order.status."""
+    if order.delivery_person_id or order.status in UNASSIGNABLE_ORDER_STATUSES:
+        return False
+
+    profiles = DeliveryProfile.objects.filter(
+        is_attended_today=True,
+    ).select_related('user').order_by('id')
+
+    for profile in profiles:
+        if _is_partner_free(profile.user):
+            order.delivery_person = profile.user
+            order.save()
+
+            profile.is_available = False
+            profile.save()
+            return True
+        elif profile.is_available:
+            profile.is_available = False
+            profile.save()
+
+    return False
+
+
+def _assign_waiting_orders():
+    """Assigns unassigned pending/picking orders to any present, free partners."""
+    waiting_orders = Order.objects.filter(
+        delivery_person__isnull=True,
+        status__in=['Pending', 'Picking'],
+    ).order_by('created_at')
+
+    for waiting_order in waiting_orders:
+        if not assign_delivery_person(waiting_order):
+            break

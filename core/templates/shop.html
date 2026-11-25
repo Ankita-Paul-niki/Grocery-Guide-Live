@@ -188,13 +188,18 @@
                 
                 <!-- Alert Messages Display -->
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex justify-content-between align-items-center" role="alert">
+            <span>{{ message }}</span>
+            {% if "cart" in message|lower %}
+                <a href="{% url 'cart_page' %}" class="alert-link fw-bold text-decoration-underline ms-3">
+                    View Cart <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            {% endif %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
 
                 <div class="row g-4">
                     <div class="col-lg-12">
