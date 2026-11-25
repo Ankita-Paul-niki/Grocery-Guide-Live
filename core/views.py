@@ -423,7 +423,7 @@ def home(request):
 
 @login_required(login_url='login')
 def orders_view(request):
-    orders_list = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders_list = Order.objects.filter(user=request.user).prefetch_related('items__product').order_by('-created_at')
     
     status_filter = request.GET.get('status')
     if status_filter:
@@ -928,31 +928,33 @@ def add_all_recipe_to_cart(request, recipe_id):
 from django.core.mail import send_mail
 from django.conf import settings
 
-def send_order_confirmation_email(order):
-    subject = f"Order Confirmation - #{order.id} | Grocery Guide"
-    
-    # Build the list of items
-    items_list_str = ""
-    for item in order.items.all():
-        items_list_str += f"- {item.product.title} (Qty: {item.quantity}) @ ₹{item.price} each\n"
-
-    message = (
-        f"Hello {order.first_name},\n\n"
-        f"Thank you for shopping with Grocery Guide!\n"
-        f"Your order has been successfully placed.\n\n"
-        f"--- Order Details ---\n"
-        f"Order ID: #{order.id}\n"
-        f"Payment Method: {order.get_payment_method_display()}\n"
-        f"Status: {order.status}\n\n"
-        f"Items Ordered:\n{items_list_str}\n"
-        f"Total Bill: ₹{order.total_price}\n\n"
-        f"Delivery Address:\n{order.address}\n\n"
-        f"We will notify you once your order is out for delivery.\n\n"
-        f"Best regards,\n"
-        f"Grocery Guide Team"
-    )
-
+def send_order_confirmation_email(order_id):
     try:
+        order = Order.objects.prefetch_related('items__product').filter(id=order_id).first()
+        if not order:
+            return
+
+        subject = f"Order Confirmation - #{order.id} | Grocery Guide"
+        items_list_str = ""
+        for item in order.items.all():
+            items_list_str += f"- {item.product.title} (Qty: {item.quantity}) @ ₹{item.price} each\n"
+
+        message = (
+            f"Hello {order.first_name},\n\n"
+            f"Thank you for shopping with Grocery Guide!\n"
+            f"Your order has been successfully placed.\n\n"
+            f"--- Order Details ---\n"
+            f"Order ID: #{order.id}\n"
+            f"Payment Method: {order.get_payment_method_display()}\n"
+            f"Status: {order.status}\n\n"
+            f"Items Ordered:\n{items_list_str}\n"
+            f"Total Bill: ₹{order.total_price}\n\n"
+            f"Delivery Address:\n{order.address}\n\n"
+            f"We will notify you once your order is out for delivery.\n\n"
+            f"Best regards,\n"
+            f"Grocery Guide Team"
+        )
+
         send_mail(
             subject=subject,
             message=message,
@@ -1029,6 +1031,7 @@ def checkout(request):
                     'country': country,
                 }
             )
+        items_snapshot = list(cart_items)
 
         if payment_method.upper() == 'RAZORPAY':
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -1060,7 +1063,7 @@ def checkout(request):
                     price=item.product.price,
                     quantity=item.quantity,
                 )
-
+            threading.Thread(target=send_order_confirmation_email, args=(order.id,), daemon=True).start()
             return JsonResponse({
                 'status': 'created',
                 'razorpay_key_id': settings.RAZORPAY_KEY_ID,
@@ -1098,6 +1101,7 @@ def checkout(request):
             )
 
         cart_items.delete()
+        threading.Thread(target=send_order_confirmation_email, args=(order.id,), daemon=True).start()
         messages.success(request, f"Bundled Order #{order.id} placed successfully with Cash on Delivery!")
         return JsonResponse({'status': 'success', 'redirect_url': '/orders/'})
 

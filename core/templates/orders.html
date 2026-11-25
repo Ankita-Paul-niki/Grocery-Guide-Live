@@ -181,25 +181,28 @@
                             <div class="row align-items-center">
                                 
                                 <!-- LEFT SIDE: ALL ITEMS IN THIS ORDER -->
-                                <div class="col-md-7">
-                                    {% for item in order.items.all %}
-                                    <div class="d-flex align-items-center gap-3 mb-2 {% if not forloop.first %}mt-3 pt-3 border-top{% endif %}">
-                                        {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                                        {% else %}
-                                        <img src="{% static 'img/fruite-item-5.jpg' %}" alt="{{ item.product.title }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                                        {% endif %}
-                                        <div>
-                                            <h6 class="mb-1 fw-bold">{{ item.product.title }}</h6>
-                                            <small class="text-muted">Qty: {{ item.quantity }} | Price: ₹{{ item.price }}</small>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                    
-                                    <div class="text-muted small mt-3 border-top pt-2">
-                                        Order ID: #{{ order.id }} | Total: <strong>₹{{ order.total_price }}</strong>
-                                    </div>
-                                </div>
+                                <!-- LEFT SIDE: ALL ITEMS IN THIS ORDER -->
+<div class="col-md-7">
+    {% for item in order.items.all %}
+    <div class="d-flex align-items-center gap-3 mb-2 {% if not forloop.first %}mt-3 pt-3 border-top{% endif %}">
+        {% if item.product and item.product.image %}
+        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+        {% else %}
+        <img src="{% static 'img/fruite-item-5.jpg' %}" alt="{{ item.product.title|default:'Product' }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+        {% endif %}
+        <div>
+            <h6 class="mb-1 fw-bold">{{ item.product.title }}</h6>
+            <small class="text-muted">Qty: {{ item.quantity }} | Price: ₹{{ item.price }}</small>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted small mb-2">No items recorded for this order.</p>
+    {% endfor %}
+    
+    <div class="text-muted small mt-3 border-top pt-2">
+        Order ID: #{{ order.id }} | Total: <strong>₹{{ order.total_price }}</strong>
+    </div>
+</div>
 
                                 <!-- RIGHT SIDE: SINGLE STATUS & RETURN PANEL FOR THE WHOLE ORDER -->
                                 <div class="col-md-5 text-md-end mt-3 mt-md-0">
