@@ -1055,7 +1055,8 @@ def checkout(request):
                 payment_method='RAZORPAY',
                 razorpay_order_id=razorpay_order['id'],
             )
-            send_order_confirmation_email(order)
+            
+
             for item in cart_items:
                 OrderItem.objects.create(
                     order=order,
@@ -1087,7 +1088,7 @@ def checkout(request):
             status='Pending',
             payment_method='COD'
         )
-        send_order_confirmation_email(order)
+        
         assigned = assign_delivery_person(order)
         if assigned:
             messages.info(request, "Delivery partner automatically assigned to your bundled order!")
